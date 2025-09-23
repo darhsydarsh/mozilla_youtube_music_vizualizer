@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YouTube Music Visualizer</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="popup-container">
+        <div class="header">
+            <img src="icons/icon.svg" alt="Visualizer Icon" class="icon">
+            <h1>YouTube Music Visualizer</h1>
+        </div>
+        
+        <div class="content">
+            <div class="control-group">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="visualizerToggle" checked>
+                    <span class="slider"></span>
+                </label>
+                <span class="control-label">Enable Visualizer</span>
+            </div>
+            
+            <div class="info">
+                <p>Add beautiful audio visualizations to your YouTube Music experience!</p>
+                <p class="note">Note: Make sure you're on music.youtube.com for the visualizer to work.</p>
+            </div>
+            
+            <div class="footer">
+                <a href="#" id="githubLink" class="link">View on GitHub</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>
