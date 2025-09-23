@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator for YouTube Music Visualizer</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: white; }
+        canvas { border: 1px solid #444; margin: 10px; background: white; }
+        button { padding: 10px 20px; margin: 5px; background: #4ecdc4; color: white; border: none; cursor: pointer; }
+        button:hover { background: #ff6b6b; }
+    </style>
+</head>
+<body>
+    <h1>Icon Generator for YouTube Music Visualizer</h1>
+    <p>This tool generates the required icon sizes for the Firefox extension.</p>
+    
+    <div>
+        <canvas id="icon16" width="16" height="16"></canvas>
+        <canvas id="icon32" width="32" height="32"></canvas>
+        <canvas id="icon48" width="48" height="48"></canvas>
+        <canvas id="icon128" width="128" height="128"></canvas>
+    </div>
+    
+    <div>
+        <button onclick="generateIcons()">Generate Icons</button>
+        <button onclick="downloadIcons()">Download All Icons</button>
+    </div>
+    
+    <script>
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            const centerX = size / 2;
+            const centerY = size / 2;
+            
+            // Clear canvas
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Draw gradient background
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, size/2);
+            gradient.addColorStop(0, '#4ecdc4');
+            gradient.addColorStop(0.5, '#ff6b6b');
+            gradient.addColorStop(1, '#1a1a1a');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Draw audio bars
+            const barCount = Math.max(3, Math.floor(size / 6));
+            const barWidth = Math.max(1, Math.floor(size / (barCount * 2)));
+            const startX = (size - (barCount * barWidth * 2)) / 2;
+            
+            ctx.fillStyle = '#ffffff';
+            for (let i = 0; i < barCount; i++) {
+                const x = startX + (i * barWidth * 2);
+                const barHeight = (Math.sin(i * 0.5) + 1) * size * 0.3 + size * 0.1;
+                const y = centerY - barHeight / 2;
+                
+                ctx.fillRect(x, y, barWidth, barHeight);
+            }
+        }
+        
+        function generateIcons() {
+            const sizes = [16, 32, 48, 128];
+            sizes.forEach(size => {
+                const canvas = document.getElementById(`icon${size}`);
+                drawIcon(canvas, size);
+            });
+        }
+        
+        function downloadIcons() {
+            const sizes = [16, 32, 48, 128];
+            sizes.forEach(size => {
+                const canvas = document.getElementById(`icon${size}`);
+                const link = document.createElement('a');
+                link.download = `icon-${size}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+        
+        // Generate icons on load
+        generateIcons();
+    </script>
+</body>
+</html>

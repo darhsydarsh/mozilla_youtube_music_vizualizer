@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>YouTube Music Visualizer Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        audio {
+            width: 100%;
+            margin: 20px 0;
+        }
+        button {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #ff6b6b;
+        }
+        .info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+    <link rel="stylesheet" href="visualizer.css">
+</head>
+<body>
+    <div class="container">
+        <h1>YouTube Music Visualizer Test Page</h1>
+        
+        <div class="info">
+            <p>This page helps test the visualizer functionality outside of YouTube Music.</p>
+            <p><strong>Note:</strong> This is for development testing only. The actual extension works on music.youtube.com</p>
+        </div>
+        
+        <audio controls crossorigin="anonymous" id="testAudio">
+            <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
+            <p>Your browser doesn't support HTML audio. Use a modern browser to test the visualizer.</p>
+        </audio>
+        
+        <div>
+            <button onclick="startTest()">Start Visualizer Test</button>
+            <button onclick="stopTest()">Stop Test</button>
+            <button onclick="toggleVisualizer()">Toggle Visualizer</button>
+        </div>
+        
+        <div id="test-visualizer-container" class="visualizer-container" style="display: none;">
+            <canvas id="test-canvas" class="visualizer-canvas" width="800" height="200"></canvas>
+        </div>
+        
+        <div class="info">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Load a local audio file or use the default test sound</li>
+                <li>Click "Start Visualizer Test" to initialize</li>
+                <li>Play the audio to see the visualization</li>
+                <li>Use "Toggle Visualizer" to test the on/off functionality</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        let audioContext = null;
+        let analyser = null;
+        let dataArray = null;
+        let bufferLength = null;
+        let animationId = null;
+        let isVisualizerEnabled = true;
+        let canvas = null;
+        let ctx = null;
+        
+        function startTest() {
+            canvas = document.getElementById('test-canvas');
+            ctx = canvas.getContext('2d');
+            const audio = document.getElementById('testAudio');
+            const container = document.getElementById('test-visualizer-container');
+            
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+                
+                const source = audioContext.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+                
+                container.style.display = 'block';
+                visualize();
+                
+                console.log('Visualizer test started successfully!');
+            } catch (error) {
+                console.error('Failed to start visualizer test:', error);
+                alert('Failed to start visualizer test. Check console for details.');
+            }
+        }
+        
+        function stopTest() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
+            const container = document.getElementById('test-visualizer-container');
+            container.style.display = 'none';
+            
+            console.log('Visualizer test stopped');
+        }
+        
+        function toggleVisualizer() {
+            isVisualizerEnabled = !isVisualizerEnabled;
+            const container = document.getElementById('test-visualizer-container');
+            container.style.display = isVisualizerEnabled ? 'block' : 'none';
+            
+            if (isVisualizerEnabled && analyser) {
+                visualize();
+            } else if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
+            console.log('Visualizer toggled:', isVisualizerEnabled ? 'ON' : 'OFF');
+        }
+        
+        function visualize() {
+            if (!isVisualizerEnabled || !analyser || !ctx) {
+                return;
+            }
+            
+            animationId = requestAnimationFrame(visualize);
+            
+            analyser.getByteFrequencyData(dataArray);
+            
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const barWidth = (canvas.width / bufferLength) * 2.5;
+            let barHeight;
+            let x = 0;
+            
+            for (let i = 0; i < bufferLength; i++) {
+                barHeight = (dataArray[i] / 255) * canvas.height * 0.8;
+                
+                const gradient = ctx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
+                gradient.addColorStop(0, `hsl(${(i * 2) % 360}, 70%, 60%)`);
+                gradient.addColorStop(1, `hsl(${(i * 2) % 360}, 90%, 40%)`);
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                
+                x += barWidth + 1;
+            }
+        }
+    </script>
+</body>
+</html>
